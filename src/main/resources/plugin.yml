@@ -1,0 +1,6 @@
+name: SiegeWeapons
+version: '${version}'
+main: com.dansplugins.siegeweapons.SiegeWeapons
+api-version: '1.16'
+authors: ["Daniel McCoy Stephenson"]
+description: Buildable medieval siege engines for Medieval Factions wars
