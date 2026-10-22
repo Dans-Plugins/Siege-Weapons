@@ -6,7 +6,7 @@ Medieval Factions gives players nations, borders and wars. It does not give them
 
 ## Target environment
 
-Spigot, Minecraft 26.1, **vanilla clients**. There is no way to give a client a custom entity model, so a siege engine has to be built out of blocks the player can already see. That is a constraint but also the right answer — a trebuchet made of real blocks is something you can walk up to, defend, and burn down.
+Spigot, on the Minecraft versions listed in [minecraft-versions.json](minecraft-versions.json), **vanilla clients**. There is no way to give a client a custom entity model, so a siege engine has to be built out of blocks the player can already see. That is a constraint but also the right answer — a trebuchet made of real blocks is something you can walk up to, defend, and burn down.
 
 ## The smallest shippable slice
 
