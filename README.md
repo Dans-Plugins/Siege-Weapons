@@ -10,7 +10,7 @@ This plugin was proposed from a Kingdom: First Era player request on 2026-09-04.
 
 ## Project Status
 
-**Pre-implementation.** No code yet. The scope of the first release is defined in [MVP.md](MVP.md) — it starts with a single engine, on purpose.
+**Pre-implementation.** The repository holds a buildable, empty Spigot plugin skeleton; no siege engine features exist yet. The scope of the first release is defined in [MVP.md](MVP.md) — it starts with a single engine, on purpose.
 
 ## Planned Features
 
@@ -45,7 +45,17 @@ Please fill out a bug report [here](https://github.com/Dans-Plugins/Siege-Weapon
 
 ## Contributing
 
-This repository follows the standards in [dpc-conventions](https://github.com/Dans-Plugins/dpc-conventions). `CONTRIBUTING.md` arrives with the build tooling.
+This repository follows the standards in [dpc-conventions](https://github.com/Dans-Plugins/dpc-conventions). `CONTRIBUTING.md` has not been written yet.
+
+### Building
+
+Build with JDK 21 (the bytecode targets Java 17, so the jar also runs on the oldest supported server):
+
+```bash
+./gradlew clean build
+```
+
+This is the same command CI runs; it also runs the tests. The jar is written to `build/libs/Siege-Weapons-<version>.jar`. The Minecraft versions the plugin claims to support are listed in [minecraft-versions.json](minecraft-versions.json).
 
 ## License
 
