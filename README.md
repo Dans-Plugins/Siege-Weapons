@@ -10,7 +10,7 @@ This plugin was proposed from a Kingdom: First Era player request on 2026-09-04.
 
 ## Project Status
 
-**Pre-implementation.** The repository holds a buildable, empty Spigot plugin skeleton; no siege engine features exist yet. The scope of the first release is defined in [MVP.md](MVP.md) — it starts with a single engine, on purpose.
+**In development, not yet released.** A trebuchet can be built and is remembered across restarts, but it cannot yet be loaded, aimed or fired. The scope of the first release is defined in [MVP.md](MVP.md) — it starts with a single engine, on purpose.
 
 ## Planned Features
 
@@ -31,9 +31,11 @@ Not yet released. Once there is a build, installation will follow the usual DPC 
 
 ### Documentation
 
+- [User Guide](USER_GUIDE.md) – How to build a trebuchet
+- [Changelog](CHANGELOG.md) – Changes since the last release
 - [MVP](MVP.md) – Scope of the first release, and its deliberate non-goals
 
-`USER_GUIDE.md`, `COMMANDS.md`, `CONFIG.md` and `CHANGELOG.md` land with the first release, per [DOCUMENTATION_PRACTICES.md](https://github.com/Dans-Plugins/dpc-conventions/blob/main/docs/DOCUMENTATION_PRACTICES.md).
+`COMMANDS.md` and `CONFIG.md` land with the first release, per [DOCUMENTATION_PRACTICES.md](https://github.com/Dans-Plugins/dpc-conventions/blob/main/docs/DOCUMENTATION_PRACTICES.md).
 
 ## Support
 
