@@ -27,6 +27,16 @@ public final class TrebuchetRegistry {
         return byAnchor.putIfAbsent(keyOf(trebuchet), trebuchet) == null;
     }
 
+    /**
+     * Removes a trebuchet, if it is the one registered at its anchor.
+     *
+     * @return {@code true} if the trebuchet was removed
+     */
+    public boolean unregister(Trebuchet trebuchet) {
+        Objects.requireNonNull(trebuchet, "trebuchet");
+        return byAnchor.remove(keyOf(trebuchet), trebuchet);
+    }
+
     public Optional<Trebuchet> findByAnchor(String world, int x, int y, int z) {
         return Optional.ofNullable(byAnchor.get(new AnchorKey(world, x, y, z)));
     }

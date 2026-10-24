@@ -96,6 +96,21 @@ public final class TrebuchetPattern {
         return true;
     }
 
+    /**
+     * Whether ({@code x}, {@code y}, {@code z}) is the position of one of the pattern's parts for
+     * an engine anchored at the given position and facing.
+     */
+    public static boolean isPartAt(int anchorX, int anchorY, int anchorZ, Facing facing, int x, int y, int z) {
+        for (Part part : PARTS) {
+            if (anchorX + offsetX(part, facing) == x
+                    && anchorY + part.up() == y
+                    && anchorZ + offsetZ(part, facing) == z) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private static int offsetX(Part part, Facing facing) {
         return part.right() * facing.rightX() + part.forward() * facing.forwardX();
     }

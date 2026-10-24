@@ -108,4 +108,21 @@ class TrebuchetPatternTest {
 
         assertTrue(TrebuchetPattern.findCompletedBy(world, 0, 70, 0).isEmpty());
     }
+
+    @ParameterizedTest
+    @EnumSource(Facing.class)
+    void isPartAtMatchesExactlyTheBlocksOfTheBuiltPattern(Facing facing) {
+        FakeWorld world = new FakeWorld();
+        world.buildTrebuchet(5, 64, 5, facing);
+
+        for (int x = 2; x <= 8; x++) {
+            for (int y = 62; y <= 68; y++) {
+                for (int z = 2; z <= 8; z++) {
+                    assertEquals(world.typeAt(x, y, z) != Material.AIR,
+                            TrebuchetPattern.isPartAt(5, 64, 5, facing, x, y, z),
+                            "at " + x + "," + y + "," + z);
+                }
+            }
+        }
+    }
 }
