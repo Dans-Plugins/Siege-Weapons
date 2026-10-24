@@ -10,7 +10,7 @@ This plugin was proposed from a Kingdom: First Era player request on 2026-09-04.
 
 ## Project Status
 
-**In development, not yet released.** A trebuchet can be built and is remembered across restarts, but it cannot yet be loaded, aimed or fired. The scope of the first release is defined in [MVP.md](MVP.md) — it starts with a single engine, on purpose.
+**In development, not yet released.** A trebuchet can be built, is remembered across restarts and can be destroyed by breaking one of its blocks, but it cannot yet be loaded, aimed or fired. The scope of the first release is defined in [MVP.md](MVP.md) — it starts with a single engine, on purpose.
 
 ## Planned Features
 
@@ -31,7 +31,7 @@ Not yet released. Once there is a build, installation will follow the usual DPC 
 
 ### Documentation
 
-- [User Guide](USER_GUIDE.md) – How to build a trebuchet
+- [User Guide](USER_GUIDE.md) – How to build and destroy a trebuchet
 - [Changelog](CHANGELOG.md) – Changes since the last release
 - [MVP](MVP.md) – Scope of the first release, and its deliberate non-goals
 

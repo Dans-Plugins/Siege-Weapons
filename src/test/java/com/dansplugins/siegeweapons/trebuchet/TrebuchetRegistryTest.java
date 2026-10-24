@@ -39,6 +39,32 @@ class TrebuchetRegistryTest {
     }
 
     @Test
+    void unregisteredTrebuchetIsNoLongerFound() {
+        TrebuchetRegistry registry = new TrebuchetRegistry();
+        Trebuchet kept = at("world", 9, 64, 9);
+        Trebuchet removed = at("world", 0, 64, 0);
+        registry.register(kept);
+        registry.register(removed);
+
+        assertTrue(registry.unregister(removed));
+
+        assertTrue(registry.findByAnchor("world", 0, 64, 0).isEmpty());
+        assertEquals(List.of(kept), List.copyOf(registry.all()));
+        assertFalse(registry.unregister(removed));
+    }
+
+    @Test
+    void unregisterLeavesADifferentEngineAtTheSameAnchor() {
+        TrebuchetRegistry registry = new TrebuchetRegistry();
+        Trebuchet registered = at("world", 0, 64, 0);
+        registry.register(registered);
+
+        assertFalse(registry.unregister(at("world", 0, 64, 0)));
+
+        assertEquals(List.of(registered), List.copyOf(registry.all()));
+    }
+
+    @Test
     void replaceAllDiscardsPreviousContents() {
         TrebuchetRegistry registry = new TrebuchetRegistry();
         registry.register(at("world", 0, 64, 0));

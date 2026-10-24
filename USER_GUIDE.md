@@ -1,6 +1,6 @@
 # Siege Weapons — User Guide
 
-Siege Weapons is in development. So far a trebuchet can be built and is remembered across server restarts. It cannot yet be loaded, aimed or fired, and it cannot be destroyed as a unit. The rest of the first release is scoped in [MVP.md](MVP.md).
+Siege Weapons is in development. So far a trebuchet can be built, is remembered across server restarts, and is destroyed when one of its blocks is lost. It cannot yet be loaded, aimed or fired. The rest of the first release is scoped in [MVP.md](MVP.md).
 
 ## Building a trebuchet
 
@@ -53,3 +53,13 @@ The order you place the blocks in does not matter. Placing more blocks on an eng
 ### Where trebuchets are stored
 
 Built trebuchets are saved to `plugins/SiegeWeapons/trebuchets.yml`. Each one records its world, the position of the centre block of its ground layer, and its facing. An entry the plugin cannot read is skipped, and a warning is written to the server log.
+
+## Destroying a trebuchet
+
+Siege engines are meant to be raided. Every block of the pattern is a key block: when one is broken by a player, burnt, or blown up, the trebuchet is destroyed and removed from `trebuchets.yml`. A player who breaks the block is told:
+
+```
+Trebuchet destroyed.
+```
+
+The rest of the structure stays where it is. Putting the missing block back builds a new trebuchet, exactly as if it had been placed for the first time. Breaking a block that is not part of the pattern, such as decoration in a `.` position, does nothing to the engine.
