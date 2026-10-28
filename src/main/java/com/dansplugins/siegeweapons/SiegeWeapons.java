@@ -4,7 +4,10 @@ import com.dansplugins.siegeweapons.trebuchet.TrebuchetBuildListener;
 import com.dansplugins.siegeweapons.trebuchet.TrebuchetBuilder;
 import com.dansplugins.siegeweapons.trebuchet.TrebuchetDestroyListener;
 import com.dansplugins.siegeweapons.trebuchet.TrebuchetDestroyer;
+import com.dansplugins.siegeweapons.trebuchet.TrebuchetFireListener;
+import com.dansplugins.siegeweapons.trebuchet.TrebuchetFiring;
 import com.dansplugins.siegeweapons.trebuchet.TrebuchetRegistry;
+import com.dansplugins.siegeweapons.trebuchet.TrebuchetSettings;
 import com.dansplugins.siegeweapons.trebuchet.TrebuchetStorage;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -13,8 +16,8 @@ import java.io.IOException;
 
 /**
  * Entry point for SiegeWeapons. Features are scoped in MVP.md; so far a trebuchet can be built,
- * is remembered across restarts and is destroyed when one of its blocks is lost, but it cannot
- * yet be loaded, aimed or fired.
+ * is remembered across restarts, can be loaded and fired, and is destroyed when one of its blocks
+ * is lost. It cannot yet be aimed, and its shots never break blocks.
  */
 public final class SiegeWeapons extends JavaPlugin {
 
@@ -26,12 +29,16 @@ public final class SiegeWeapons extends JavaPlugin {
         if (!getDataFolder().exists() && !getDataFolder().mkdirs()) {
             getLogger().warning("Could not create the plugin data folder; built trebuchets will not be saved.");
         }
+        saveDefaultConfig();
+        TrebuchetSettings settings = TrebuchetSettings.from(getConfig(), getLogger()::warning);
         storage = new TrebuchetStorage(new File(getDataFolder(), "trebuchets.yml"), getLogger()::warning);
         trebuchets.replaceAll(storage.load());
         getServer().getPluginManager().registerEvents(
                 new TrebuchetBuildListener(new TrebuchetBuilder(trebuchets, storage, getLogger()::warning)), this);
         getServer().getPluginManager().registerEvents(
                 new TrebuchetDestroyListener(new TrebuchetDestroyer(trebuchets, storage, getLogger()::warning)), this);
+        getServer().getPluginManager().registerEvents(
+                new TrebuchetFireListener(new TrebuchetFiring(trebuchets), settings), this);
     }
 
     @Override
