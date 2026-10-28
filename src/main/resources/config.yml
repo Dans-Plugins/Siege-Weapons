@@ -1,0 +1,7 @@
+# Siege Weapons configuration. Every key is documented in CONFIG.md.
+
+trebuchet:
+  # Power of the explosion where a trebuchet shot lands. TNT is 4.
+  # Shots hurt players and mobs but never break blocks: block damage is reserved for Medieval
+  # Factions wars and is not configurable.
+  explosion-power: 3.0
