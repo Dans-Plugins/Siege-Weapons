@@ -1,6 +1,6 @@
 # Siege Weapons — User Guide
 
-Siege Weapons is in development. So far a trebuchet can be built, is remembered across server restarts, can be loaded and fired, and is destroyed when one of its blocks is lost. It cannot yet be aimed. The rest of the first release is scoped in [MVP.md](MVP.md).
+Siege Weapons is in development. So far a trebuchet can be built, is remembered across server restarts, can be loaded and fired with a cooldown between shots, and is destroyed when one of its blocks is lost. It cannot yet be aimed. The rest of the first release is scoped in [MVP.md](MVP.md).
 
 ## Building a trebuchet
 
@@ -63,11 +63,13 @@ The centre block of the axle (the middle `L` of layer 3) is the load block.
 
 Right-clicking an unloaded trebuchet without cobblestone in your hand tells you `Load the trebuchet with cobblestone first.`
 
+After a shot, a trebuchet has to wait before it can fire again: 10 seconds by default, set by `trebuchet.shot-cooldown-seconds` (see [CONFIG.md](CONFIG.md)). You can reload it straight away, but trying to fire it before the wait is over tells you `The trebuchet can fire again in <seconds>s.` and it keeps its shot. Each trebuchet has its own cooldown.
+
 The shot is thrown from just above the axle, in the direction the trebuchet faces, at 45 degrees. It flies in an arc and lands roughly 50 blocks away on level ground. Aiming is not implemented yet, so every shot from the same trebuchet lands in the same place.
 
 Where the shot lands it explodes, with the power set by `trebuchet.explosion-power` (see [CONFIG.md](CONFIG.md)). The explosion hurts players and mobs, but **never breaks blocks**. Block damage will only ever be allowed during a Medieval Factions war, against land claimed by the enemy, and that is not implemented yet.
 
-A loaded trebuchet is unloaded when the server restarts, and its cobblestone is not returned.
+A loaded trebuchet is unloaded when the server restarts, and its cobblestone is not returned. A restart also ends any cooldown.
 
 ## Destroying a trebuchet
 

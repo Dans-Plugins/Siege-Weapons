@@ -16,8 +16,9 @@ import java.io.IOException;
 
 /**
  * Entry point for SiegeWeapons. Features are scoped in MVP.md; so far a trebuchet can be built,
- * is remembered across restarts, can be loaded and fired, and is destroyed when one of its blocks
- * is lost. It cannot yet be aimed, and its shots never break blocks.
+ * is remembered across restarts, can be loaded and fired with a cooldown between shots, and is
+ * destroyed when one of its blocks is lost. It cannot yet be aimed, and its shots never break
+ * blocks.
  */
 public final class SiegeWeapons extends JavaPlugin {
 
@@ -38,7 +39,7 @@ public final class SiegeWeapons extends JavaPlugin {
         getServer().getPluginManager().registerEvents(
                 new TrebuchetDestroyListener(new TrebuchetDestroyer(trebuchets, storage, getLogger()::warning)), this);
         getServer().getPluginManager().registerEvents(
-                new TrebuchetFireListener(new TrebuchetFiring(trebuchets), settings), this);
+                new TrebuchetFireListener(new TrebuchetFiring(trebuchets, settings.shotCooldown(), System::nanoTime), settings), this);
     }
 
     @Override

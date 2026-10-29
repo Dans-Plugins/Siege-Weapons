@@ -9,6 +9,7 @@ A value the plugin cannot use is replaced by its default, and a warning naming t
 | Key | Type | Default | Meaning |
 |---|---|---|---|
 | `trebuchet.explosion-power` | number greater than 0 | `3.0` | Power of the explosion where a trebuchet shot lands. For comparison, TNT is `4`. |
+| `trebuchet.shot-cooldown-seconds` | whole number from 0 to 86400 | `10` | Seconds a trebuchet must wait after firing before it can fire again. `0` turns the cooldown off. A trebuchet can be reloaded while it waits. |
 
 ## Block damage
 

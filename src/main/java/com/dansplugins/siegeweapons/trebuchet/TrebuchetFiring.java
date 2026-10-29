@@ -1,16 +1,22 @@
 package com.dansplugins.siegeweapons.trebuchet;
 
+import java.time.Duration;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.LongSupplier;
 
 /**
  * Loading and firing. The centre of the axle is the load block: using it with ammunition in hand
- * loads the engine, and using it again fires. An engine holds one shot at a time.
+ * loads the engine, and using it again fires. An engine holds one shot at a time, and after firing
+ * it cannot fire again until its cooldown has passed. It can be reloaded during the cooldown.
  *
  * <p>Loads are kept in memory only, so a loaded engine is unloaded by a server restart. A
- * destroyed engine's load is lost with it: rebuilding it makes a new, unloaded engine.
+ * destroyed engine's load and cooldown are lost with it: rebuilding it makes a new, unloaded
+ * engine that can fire as soon as it is loaded.
  */
 public final class TrebuchetFiring {
 
@@ -24,18 +30,38 @@ public final class TrebuchetFiring {
         /** The engine's shot was fired. */
         FIRED,
         /** The engine had no shot, and the player held no ammunition. */
-        NOT_LOADED
+        NOT_LOADED,
+        /** The engine is loaded but fired too recently to fire again; it keeps its shot. */
+        COOLING_DOWN
     }
 
-    /** The outcome of using the load block of {@code trebuchet}. */
-    public record Interaction(Trebuchet trebuchet, Result result) {
+    /**
+     * The outcome of using the load block of {@code trebuchet}.
+     *
+     * @param cooldownRemaining how long until the engine can fire again; zero unless the result is
+     *                          {@link Result#COOLING_DOWN}
+     */
+    public record Interaction(Trebuchet trebuchet, Result result, Duration cooldownRemaining) {
+
+        Interaction(Trebuchet trebuchet, Result result) {
+            this(trebuchet, result, Duration.ZERO);
+        }
     }
 
     private final TrebuchetRegistry registry;
+    private final long cooldownNanos;
+    private final LongSupplier nanoClock;
     private final Set<UUID> loaded = new HashSet<>();
+    private final Map<UUID, Long> lastFired = new HashMap<>();
 
-    public TrebuchetFiring(TrebuchetRegistry registry) {
+    /**
+     * @param cooldown  the shortest time between two shots of one engine
+     * @param nanoClock a monotonic clock in nanoseconds, such as {@link System#nanoTime()}
+     */
+    public TrebuchetFiring(TrebuchetRegistry registry, Duration cooldown, LongSupplier nanoClock) {
         this.registry = registry;
+        this.cooldownNanos = cooldown.toNanos();
+        this.nanoClock = nanoClock;
     }
 
     /**
@@ -47,7 +73,15 @@ public final class TrebuchetFiring {
      */
     public Optional<Interaction> use(String world, int x, int y, int z, boolean holdingAmmunition) {
         return engineWithLoadBlockAt(world, x, y, z).map(trebuchet -> {
-            if (loaded.remove(trebuchet.id())) {
+            if (loaded.contains(trebuchet.id())) {
+                long now = nanoClock.getAsLong();
+                Long firedAt = lastFired.get(trebuchet.id());
+                if (firedAt != null && now - firedAt < cooldownNanos) {
+                    return new Interaction(trebuchet, Result.COOLING_DOWN,
+                            Duration.ofNanos(cooldownNanos - (now - firedAt)));
+                }
+                loaded.remove(trebuchet.id());
+                lastFired.put(trebuchet.id(), now);
                 return new Interaction(trebuchet, Result.FIRED);
             }
             if (holdingAmmunition) {
@@ -56,6 +90,12 @@ public final class TrebuchetFiring {
             }
             return new Interaction(trebuchet, Result.NOT_LOADED);
         });
+    }
+
+    /** {@code duration} in whole seconds, rounded up, so a player is never told to wait 0s. */
+    public static long wholeSecondsUp(Duration duration) {
+        long seconds = duration.getSeconds();
+        return duration.getNano() > 0 ? seconds + 1 : seconds;
     }
 
     public boolean isLoaded(Trebuchet trebuchet) {

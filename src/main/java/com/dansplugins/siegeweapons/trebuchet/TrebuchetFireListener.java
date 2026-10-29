@@ -60,6 +60,8 @@ public final class TrebuchetFireListener implements Listener {
                             player.sendMessage("Trebuchet fired.");
                         }
                         case NOT_LOADED -> player.sendMessage("Load the trebuchet with cobblestone first.");
+                        case COOLING_DOWN -> player.sendMessage("The trebuchet can fire again in "
+                                + TrebuchetFiring.wholeSecondsUp(interaction.cooldownRemaining()) + "s.");
                     }
                 });
     }
