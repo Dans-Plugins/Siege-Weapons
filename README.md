@@ -10,7 +10,7 @@ This plugin was proposed from a Kingdom: First Era player request on 2026-09-04.
 
 ## Project Status
 
-**In development, not yet released.** A trebuchet can be built, is remembered across restarts, can be loaded and fired, and can be destroyed by breaking one of its blocks. It cannot yet be aimed, and its shots never break blocks. The scope of the first release is defined in [MVP.md](MVP.md) — it starts with a single engine, on purpose.
+**In development, not yet released.** A trebuchet can be built, is remembered across restarts, can be loaded and fired with a cooldown between shots, and can be destroyed by breaking one of its blocks. It cannot yet be aimed, and its shots never break blocks. The scope of the first release is defined in [MVP.md](MVP.md) — it starts with a single engine, on purpose.
 
 ## Planned Features
 

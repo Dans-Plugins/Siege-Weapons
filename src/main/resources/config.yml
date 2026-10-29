@@ -5,3 +5,7 @@ trebuchet:
   # Shots hurt players and mobs but never break blocks: block damage is reserved for Medieval
   # Factions wars and is not configurable.
   explosion-power: 3.0
+
+  # Seconds a trebuchet must wait after firing before it can fire again. 0 turns the cooldown off.
+  # It can be reloaded while it waits.
+  shot-cooldown-seconds: 10
