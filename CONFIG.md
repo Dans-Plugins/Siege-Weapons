@@ -14,7 +14,7 @@ A value the plugin cannot use is replaced by its default, and a warning naming t
 | `trebuchet.max-range` | whole number from 1 to 150 | `80` | Longest range of a trebuchet shot, in blocks on level ground. Aiming past it goes back to `trebuchet.min-range`. |
 | `trebuchet.range-step` | whole number from 1 to 150 | `10` | How many blocks each aiming adjustment adds to the range. The last step before `trebuchet.max-range` is shortened to land on it exactly. |
 
-If `trebuchet.min-range` is greater than `trebuchet.max-range`, both use their defaults and a warning is written to the server log. Set them equal to give every trebuchet a single, fixed range. See [USER_GUIDE.md](USER_GUIDE.md#aiming) for how players aim.
+If `trebuchet.min-range` is greater than `trebuchet.max-range`, both use their defaults and a warning is written to the server log. Set them equal to give every trebuchet a single, fixed range. A range of only a few blocks lands the shot on or beside the trebuchet itself, and its explosion can hurt whoever fired it. See [USER_GUIDE.md](USER_GUIDE.md#aiming) for how players aim.
 
 ## Block damage
 
