@@ -1,6 +1,6 @@
 # Siege Weapons — User Guide
 
-Siege Weapons is in development. So far a trebuchet can be built, is remembered across server restarts, can be loaded and fired with a cooldown between shots, and is destroyed when one of its blocks is lost. It cannot yet be aimed. The rest of the first release is scoped in [MVP.md](MVP.md).
+Siege Weapons is in development. So far a trebuchet can be built, is remembered across server restarts, can be aimed, loaded and fired with a cooldown between shots, and is destroyed when one of its blocks is lost. The rest of the first release is scoped in [MVP.md](MVP.md).
 
 ## Building a trebuchet
 
@@ -59,17 +59,33 @@ Built trebuchets are saved to `plugins/SiegeWeapons/trebuchets.yml`. Each one re
 The centre block of the axle (the middle `L` of layer 3) is the load block.
 
 1. Hold **cobblestone** and right-click the load block. One cobblestone is taken from your hand and you are told `Trebuchet loaded.` A trebuchet holds one shot at a time.
-2. Right-click the load block again, with anything in your hand, to fire. You are told `Trebuchet fired.`
+2. Right-click the load block again, with anything in your hand, to fire. You are told the range it fired at, for example `Trebuchet fired at 20 blocks.`
 
 Right-clicking an unloaded trebuchet without cobblestone in your hand tells you `Load the trebuchet with cobblestone first.`
 
 After a shot, a trebuchet has to wait before it can fire again: 10 seconds by default, set by `trebuchet.shot-cooldown-seconds` (see [CONFIG.md](CONFIG.md)). You can reload it straight away, but trying to fire it before the wait is over tells you `The trebuchet can fire again in <seconds>s.` and it keeps its shot. Each trebuchet has its own cooldown.
 
-The shot is thrown from just above the axle, in the direction the trebuchet faces, at 45 degrees. It flies in an arc and lands roughly 50 blocks away on level ground. Aiming is not implemented yet, so every shot from the same trebuchet lands in the same place.
+The shot is thrown from just above the axle, in the direction the trebuchet faces, at 45 degrees. It flies in an arc and, on level ground, lands about the trebuchet's range away from the centre of its base (see [Aiming](#aiming)). Hills, walls and slopes in the way change where it actually comes down.
 
 Where the shot lands it explodes, with the power set by `trebuchet.explosion-power` (see [CONFIG.md](CONFIG.md)). The explosion hurts players and mobs, but **never breaks blocks**. Block damage will only ever be allowed during a Medieval Factions war, against land claimed by the enemy, and that is not implemented yet.
 
 A loaded trebuchet is unloaded when the server restarts, and its cobblestone is not returned. A restart also ends any cooldown.
+
+## Aiming
+
+A trebuchet always fires in the direction it faces, which is fixed when it is built. To turn it, rebuild it facing another way.
+
+What you aim is its **range**: how far away, in blocks on level ground, its shot lands. A newly built trebuchet starts at the shortest range, 20 blocks by default.
+
+**Sneak and right-click the load block** to lengthen the range by one step (10 blocks by default). You are told the new range:
+
+```
+Trebuchet range set to 30 blocks.
+```
+
+Lengthening it past the longest range (80 blocks by default) takes it back to the shortest. Sneaking and right-clicking never loads or fires the trebuchet, and you can aim it whether or not it is loaded. The shortest range, the longest range and the step are set in [CONFIG.md](CONFIG.md).
+
+Each trebuchet keeps its own range. A server restart puts every trebuchet back at the shortest range, and so does destroying and rebuilding one.
 
 ## Destroying a trebuchet
 

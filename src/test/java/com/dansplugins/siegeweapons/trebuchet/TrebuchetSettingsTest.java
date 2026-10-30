@@ -36,6 +36,9 @@ class TrebuchetSettingsTest {
 
             assertEquals(TrebuchetSettings.DEFAULT_EXPLOSION_POWER, settings.explosionPower());
             assertEquals(Duration.ofSeconds(TrebuchetSettings.DEFAULT_SHOT_COOLDOWN_SECONDS), settings.shotCooldown());
+            assertEquals(TrebuchetSettings.DEFAULT_MIN_RANGE, settings.minRange());
+            assertEquals(TrebuchetSettings.DEFAULT_MAX_RANGE, settings.maxRange());
+            assertEquals(TrebuchetSettings.DEFAULT_RANGE_STEP, settings.rangeStep());
         }
         assertTrue(warnings.isEmpty(), warnings::toString);
     }
@@ -93,6 +96,56 @@ class TrebuchetSettingsTest {
             assertEquals(1, warnings.size(), value);
             assertTrue(warnings.get(0).contains(TrebuchetSettings.SHOT_COOLDOWN_KEY), warnings::toString);
         }
+    }
+
+    @Test
+    void readsTheRange() throws Exception {
+        TrebuchetSettings settings = read("trebuchet:\n  min-range: 5\n  max-range: 150\n  range-step: 25\n");
+
+        assertEquals(5, settings.minRange());
+        assertEquals(150, settings.maxRange());
+        assertEquals(25, settings.rangeStep());
+        assertEquals(40, read("trebuchet:\n  min-range: 40\n  max-range: 40\n").maxRange());
+        assertTrue(warnings.isEmpty(), warnings::toString);
+    }
+
+    @Test
+    void aMissingRangeUsesTheDefaultsSilently() throws Exception {
+        TrebuchetSettings settings = read("");
+
+        assertEquals(TrebuchetSettings.DEFAULT_MIN_RANGE, settings.minRange());
+        assertEquals(TrebuchetSettings.DEFAULT_MAX_RANGE, settings.maxRange());
+        assertEquals(TrebuchetSettings.DEFAULT_RANGE_STEP, settings.rangeStep());
+        assertTrue(warnings.isEmpty(), warnings::toString);
+    }
+
+    @Test
+    void anInvalidRangeValueUsesItsDefaultAndWarns() throws Exception {
+        for (String key : List.of("min-range", "max-range", "range-step")) {
+            for (String value : List.of("0", "-5", "151", "12.5", "far")) {
+                warnings.clear();
+
+                TrebuchetSettings settings = read("trebuchet:\n  " + key + ": " + value + "\n");
+
+                assertEquals(TrebuchetSettings.DEFAULT_MIN_RANGE, settings.minRange(), key + "=" + value);
+                assertEquals(TrebuchetSettings.DEFAULT_MAX_RANGE, settings.maxRange(), key + "=" + value);
+                assertEquals(TrebuchetSettings.DEFAULT_RANGE_STEP, settings.rangeStep(), key + "=" + value);
+                assertEquals(1, warnings.size(), key + "=" + value);
+                assertTrue(warnings.get(0).contains("trebuchet." + key), warnings::toString);
+            }
+        }
+    }
+
+    @Test
+    void aMinRangeAboveTheMaxRangeUsesBothDefaultsAndWarns() throws Exception {
+        TrebuchetSettings settings = read("trebuchet:\n  min-range: 90\n  max-range: 30\n  range-step: 5\n");
+
+        assertEquals(TrebuchetSettings.DEFAULT_MIN_RANGE, settings.minRange());
+        assertEquals(TrebuchetSettings.DEFAULT_MAX_RANGE, settings.maxRange());
+        assertEquals(5, settings.rangeStep());
+        assertEquals(1, warnings.size(), warnings::toString);
+        assertTrue(warnings.get(0).contains(TrebuchetSettings.MIN_RANGE_KEY), warnings::toString);
+        assertTrue(warnings.get(0).contains(TrebuchetSettings.MAX_RANGE_KEY), warnings::toString);
     }
 
     @Test
