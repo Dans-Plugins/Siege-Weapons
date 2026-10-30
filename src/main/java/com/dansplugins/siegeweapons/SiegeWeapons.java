@@ -1,5 +1,6 @@
 package com.dansplugins.siegeweapons;
 
+import com.dansplugins.siegeweapons.trebuchet.TrebuchetAiming;
 import com.dansplugins.siegeweapons.trebuchet.TrebuchetBuildListener;
 import com.dansplugins.siegeweapons.trebuchet.TrebuchetBuilder;
 import com.dansplugins.siegeweapons.trebuchet.TrebuchetDestroyListener;
@@ -16,9 +17,8 @@ import java.io.IOException;
 
 /**
  * Entry point for SiegeWeapons. Features are scoped in MVP.md; so far a trebuchet can be built,
- * is remembered across restarts, can be loaded and fired with a cooldown between shots, and is
- * destroyed when one of its blocks is lost. It cannot yet be aimed, and its shots never break
- * blocks.
+ * is remembered across restarts, can be aimed, loaded and fired with a cooldown between shots,
+ * and is destroyed when one of its blocks is lost. Its shots never break blocks.
  */
 public final class SiegeWeapons extends JavaPlugin {
 
@@ -39,7 +39,9 @@ public final class SiegeWeapons extends JavaPlugin {
         getServer().getPluginManager().registerEvents(
                 new TrebuchetDestroyListener(new TrebuchetDestroyer(trebuchets, storage, getLogger()::warning)), this);
         getServer().getPluginManager().registerEvents(
-                new TrebuchetFireListener(new TrebuchetFiring(trebuchets, settings.shotCooldown(), System::nanoTime), settings), this);
+                new TrebuchetFireListener(new TrebuchetFiring(trebuchets, settings.shotCooldown(), System::nanoTime),
+                        new TrebuchetAiming(trebuchets, settings.minRange(), settings.maxRange(), settings.rangeStep()),
+                        settings), this);
     }
 
     @Override

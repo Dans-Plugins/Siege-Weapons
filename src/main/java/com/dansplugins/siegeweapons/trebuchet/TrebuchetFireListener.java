@@ -21,8 +21,9 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * Bukkit glue: hands right-clicks on a block to {@link TrebuchetFiring}, launches the projectile
- * a fired engine throws, and explodes it where it lands.
+ * Bukkit glue: hands sneaking right-clicks on a block to {@link TrebuchetAiming} and other
+ * right-clicks to {@link TrebuchetFiring}, launches the projectile a fired engine throws, and
+ * explodes it where it lands.
  */
 public final class TrebuchetFireListener implements Listener {
 
@@ -30,11 +31,13 @@ public final class TrebuchetFireListener implements Listener {
     public static final Material AMMUNITION = Material.COBBLESTONE;
 
     private final TrebuchetFiring firing;
+    private final TrebuchetAiming aiming;
     private final TrebuchetSettings settings;
     private final Set<UUID> inFlight = new HashSet<>();
 
-    public TrebuchetFireListener(TrebuchetFiring firing, TrebuchetSettings settings) {
+    public TrebuchetFireListener(TrebuchetFiring firing, TrebuchetAiming aiming, TrebuchetSettings settings) {
         this.firing = firing;
+        this.aiming = aiming;
         this.settings = settings;
     }
 
@@ -45,6 +48,15 @@ public final class TrebuchetFireListener implements Listener {
             return;
         }
         Player player = event.getPlayer();
+        if (player.isSneaking()) {
+            aiming.adjust(block.getWorld().getName(), block.getX(), block.getY(), block.getZ())
+                    .ifPresent(aim -> {
+                        // Aiming must not also place the held block or open anything.
+                        event.setCancelled(true);
+                        player.sendMessage("Trebuchet range set to " + aim.range() + " blocks.");
+                    });
+            return;
+        }
         ItemStack hand = player.getInventory().getItemInMainHand();
         firing.use(block.getWorld().getName(), block.getX(), block.getY(), block.getZ(), hand.getType() == AMMUNITION)
                 .ifPresent(interaction -> {
@@ -56,8 +68,9 @@ public final class TrebuchetFireListener implements Listener {
                             player.sendMessage("Trebuchet loaded.");
                         }
                         case FIRED -> {
-                            launch(block.getWorld(), interaction.trebuchet(), player);
-                            player.sendMessage("Trebuchet fired.");
+                            int range = aiming.rangeOf(interaction.trebuchet());
+                            launch(block.getWorld(), interaction.trebuchet(), range, player);
+                            player.sendMessage("Trebuchet fired at " + range + " blocks.");
                         }
                         case NOT_LOADED -> player.sendMessage("Load the trebuchet with cobblestone first.");
                         case COOLING_DOWN -> player.sendMessage("The trebuchet can fire again in "
@@ -78,8 +91,8 @@ public final class TrebuchetFireListener implements Listener {
         projectile.remove();
     }
 
-    private void launch(World world, Trebuchet trebuchet, Player firer) {
-        TrebuchetTrajectory.Launch launch = TrebuchetTrajectory.launchFrom(trebuchet);
+    private void launch(World world, Trebuchet trebuchet, int range, Player firer) {
+        TrebuchetTrajectory.Launch launch = TrebuchetTrajectory.launchFrom(trebuchet, range);
         Snowball projectile = world.spawn(new Location(world, launch.x(), launch.y(), launch.z()), Snowball.class);
         projectile.setItem(new ItemStack(AMMUNITION));
         projectile.setShooter(firer);

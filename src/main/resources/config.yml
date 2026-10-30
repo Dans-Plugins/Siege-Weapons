@@ -9,3 +9,11 @@ trebuchet:
   # Seconds a trebuchet must wait after firing before it can fire again. 0 turns the cooldown off.
   # It can be reloaded while it waits.
   shot-cooldown-seconds: 10
+
+  # Shortest and longest range of a trebuchet shot, in blocks on level ground. A trebuchet starts at
+  # min-range. Sneaking and right-clicking the centre of its axle lengthens the range by range-step,
+  # and past max-range it goes back to min-range.
+  # Each is a whole number from 1 to 150, and min-range must not be greater than max-range.
+  min-range: 20
+  max-range: 80
+  range-step: 10
