@@ -79,4 +79,63 @@ class TrebuchetStorageTest {
         assertEquals(List.of(new Trebuchet(good, "world", 1, 2, 3, Facing.SOUTH)), loaded);
         assertEquals(3, warnings.size(), warnings::toString);
     }
+
+    @Test
+    void savingAgainDropsEnginesNoLongerPassed() throws IOException {
+        Trebuchet kept = new Trebuchet(UUID.randomUUID(), "world", 10, 64, -20, Facing.EAST);
+        Trebuchet destroyed = new Trebuchet(UUID.randomUUID(), "world", 40, 70, 5, Facing.NORTH);
+        storage().save(List.of(kept, destroyed));
+
+        storage().save(List.of(kept));
+
+        assertEquals(List.of(kept), storage().load());
+    }
+
+    @Test
+    void savingNoEnginesLoadsNothing() throws IOException {
+        storage().save(List.of(new Trebuchet(UUID.randomUUID(), "world", 1, 2, 3, Facing.SOUTH)));
+
+        storage().save(List.of());
+
+        assertTrue(storage().load().isEmpty());
+        assertTrue(warnings.isEmpty(), warnings::toString);
+    }
+
+    @Test
+    void aFileWithoutATrebuchetsSectionLoadsNothing() throws IOException {
+        Files.writeString(dir.resolve("trebuchets.yml"), "something-else: 1\n");
+
+        assertTrue(storage().load().isEmpty());
+        assertTrue(warnings.isEmpty(), warnings::toString);
+    }
+
+    @Test
+    void entriesMissingTheirWorldOrFacingOrNotASectionAreSkippedWithAWarningNamingThem() throws IOException {
+        UUID noWorld = UUID.randomUUID();
+        UUID noFacing = UUID.randomUUID();
+        UUID notASection = UUID.randomUUID();
+        Files.writeString(dir.resolve("trebuchets.yml"), String.join("\n",
+                "trebuchets:",
+                "  " + noWorld + ":",
+                "    x: 1",
+                "    y: 2",
+                "    z: 3",
+                "    facing: SOUTH",
+                "  " + noFacing + ":",
+                "    world: world",
+                "    x: 1",
+                "    y: 2",
+                "    z: 3",
+                "  " + notASection + ": 5",
+                ""));
+
+        List<Trebuchet> loaded = storage().load();
+
+        assertTrue(loaded.isEmpty(), loaded::toString);
+        assertEquals(3, warnings.size(), warnings::toString);
+        for (UUID key : List.of(noWorld, noFacing, notASection)) {
+            String prefix = "Skipping unreadable trebuchet '" + key + "' in trebuchets.yml: ";
+            assertTrue(warnings.stream().anyMatch(warning -> warning.startsWith(prefix)), warnings::toString);
+        }
+    }
 }
