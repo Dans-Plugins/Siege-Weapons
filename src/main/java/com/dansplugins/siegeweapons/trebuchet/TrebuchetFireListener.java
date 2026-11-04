@@ -23,7 +23,7 @@ import java.util.UUID;
 /**
  * Bukkit glue: hands sneaking right-clicks on a block to {@link TrebuchetAiming} and other
  * right-clicks to {@link TrebuchetFiring}, launches the projectile a fired engine throws, and
- * explodes it where it lands.
+ * explodes it where it lands, breaking blocks only if the {@link WarGate} allows it.
  */
 public final class TrebuchetFireListener implements Listener {
 
@@ -33,12 +33,15 @@ public final class TrebuchetFireListener implements Listener {
     private final TrebuchetFiring firing;
     private final TrebuchetAiming aiming;
     private final TrebuchetSettings settings;
+    private final WarGate warGate;
     private final Set<UUID> inFlight = new HashSet<>();
 
-    public TrebuchetFireListener(TrebuchetFiring firing, TrebuchetAiming aiming, TrebuchetSettings settings) {
+    public TrebuchetFireListener(TrebuchetFiring firing, TrebuchetAiming aiming, TrebuchetSettings settings,
+                                 WarGate warGate) {
         this.firing = firing;
         this.aiming = aiming;
         this.settings = settings;
+        this.warGate = warGate;
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -86,8 +89,11 @@ public final class TrebuchetFireListener implements Listener {
             return;
         }
         Entity source = event.getEntity().getShooter() instanceof Entity shooter ? shooter : null;
-        projectile.getWorld().createExplosion(projectile.getLocation(), settings.explosionPower(),
-                false, settings.breaksBlocks(), source);
+        UUID firer = source instanceof Player player ? player.getUniqueId() : null;
+        Location landed = projectile.getLocation();
+        boolean breaksBlocks = warGate.mayBreakBlockAt(firer, projectile.getWorld().getName(),
+                landed.getBlockX(), landed.getBlockZ());
+        projectile.getWorld().createExplosion(landed, settings.explosionPower(), false, breaksBlocks, source);
         projectile.remove();
     }
 

@@ -8,9 +8,8 @@ import java.util.function.Consumer;
 /**
  * The configurable values a trebuchet shot uses, read from {@code config.yml}.
  *
- * <p>There is deliberately no setting for block damage. A shot never breaks blocks until the
- * Medieval Factions war gate exists, and once it does, only that gate decides (MVP.md: block
- * damage outside a declared war is never configurable).
+ * <p>There is deliberately no setting for block damage. Only the {@link WarGate} decides that
+ * (MVP.md: block damage outside a declared war is never configurable).
  */
 public record TrebuchetSettings(float explosionPower, Duration shotCooldown, int minRange, int maxRange,
                                 int rangeStep) {
@@ -76,10 +75,5 @@ public record TrebuchetSettings(float explosionPower, Duration shotCooldown, int
         warn.accept(key + " must be a whole number from " + min + " to " + max + ", but is '" + raw
                 + "'; using " + fallback + ".");
         return fallback;
-    }
-
-    /** Whether a shot's explosion breaks blocks. Always {@code false} until the war gate exists. */
-    public boolean breaksBlocks() {
-        return false;
     }
 }

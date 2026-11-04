@@ -5,13 +5,16 @@ import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.RecordComponent;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -149,7 +152,7 @@ class TrebuchetSettingsTest {
     }
 
     @Test
-    void noConfigKeyMakesAShotBreakBlocks() throws Exception {
+    void noSettingCanHoldBlockDamage() throws Exception {
         TrebuchetSettings settings = read("""
                 trebuchet:
                   explosion-power: 4
@@ -157,6 +160,11 @@ class TrebuchetSettingsTest {
                   block-damage: true
                 """);
 
-        assertFalse(settings.breaksBlocks());
+        assertEquals(4.0f, settings.explosionPower());
+        assertTrue(warnings.isEmpty(), warnings::toString);
+        for (RecordComponent component : TrebuchetSettings.class.getRecordComponents()) {
+            assertNotEquals(boolean.class, component.getType(), component.getName());
+            assertFalse(component.getName().toLowerCase(Locale.ROOT).contains("block"), component.getName());
+        }
     }
 }
