@@ -10,6 +10,7 @@ import com.dansplugins.siegeweapons.trebuchet.TrebuchetFiring;
 import com.dansplugins.siegeweapons.trebuchet.TrebuchetRegistry;
 import com.dansplugins.siegeweapons.trebuchet.TrebuchetSettings;
 import com.dansplugins.siegeweapons.trebuchet.TrebuchetStorage;
+import com.dansplugins.siegeweapons.trebuchet.WarGate;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -41,7 +42,8 @@ public final class SiegeWeapons extends JavaPlugin {
         getServer().getPluginManager().registerEvents(
                 new TrebuchetFireListener(new TrebuchetFiring(trebuchets, settings.shotCooldown(), System::nanoTime),
                         new TrebuchetAiming(trebuchets, settings.minRange(), settings.maxRange(), settings.rangeStep()),
-                        settings), this);
+                        // Closed until Medieval Factions is integrated, so shots break no blocks.
+                        settings, WarGate.closed()), this);
     }
 
     @Override
