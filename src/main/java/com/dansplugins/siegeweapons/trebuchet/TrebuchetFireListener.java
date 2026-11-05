@@ -21,7 +21,8 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * Bukkit glue: hands sneaking right-clicks on a block to {@link TrebuchetAiming} and other
+ * Bukkit glue: has the {@link TrebuchetDestroyer} check an engine for missing parts when its load
+ * block is used, then hands sneaking right-clicks on a block to {@link TrebuchetAiming} and other
  * right-clicks to {@link TrebuchetFiring}, launches the projectile a fired engine throws, and
  * explodes it where it lands, breaking blocks only if the {@link WarGate} allows it.
  */
@@ -30,14 +31,16 @@ public final class TrebuchetFireListener implements Listener {
     /** What a trebuchet is loaded with. */
     public static final Material AMMUNITION = Material.COBBLESTONE;
 
+    private final TrebuchetDestroyer destroyer;
     private final TrebuchetFiring firing;
     private final TrebuchetAiming aiming;
     private final TrebuchetSettings settings;
     private final WarGate warGate;
     private final Set<UUID> inFlight = new HashSet<>();
 
-    public TrebuchetFireListener(TrebuchetFiring firing, TrebuchetAiming aiming, TrebuchetSettings settings,
-                                 WarGate warGate) {
+    public TrebuchetFireListener(TrebuchetDestroyer destroyer, TrebuchetFiring firing, TrebuchetAiming aiming,
+                                 TrebuchetSettings settings, WarGate warGate) {
+        this.destroyer = destroyer;
         this.firing = firing;
         this.aiming = aiming;
         this.settings = settings;
@@ -51,6 +54,12 @@ public final class TrebuchetFireListener implements Listener {
             return;
         }
         Player player = event.getPlayer();
+        World world = block.getWorld();
+        if (destroyer.loadBlockUsed(world.getName(), (x, y, z) -> world.getBlockAt(x, y, z).getType(),
+                block.getX(), block.getY(), block.getZ()).isPresent()) {
+            player.sendMessage("Trebuchet destroyed.");
+            return;
+        }
         if (player.isSneaking()) {
             aiming.adjust(block.getWorld().getName(), block.getX(), block.getY(), block.getZ())
                     .ifPresent(aim -> {

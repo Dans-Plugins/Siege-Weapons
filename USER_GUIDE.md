@@ -89,10 +89,12 @@ Each trebuchet keeps its own range. A server restart puts every trebuchet back a
 
 ## Destroying a trebuchet
 
-Siege engines are meant to be raided. Every block of the pattern is a key block: when one is broken by a player, burnt, or blown up, the trebuchet is destroyed and removed from `trebuchets.yml`. A player who breaks the block is told:
+Siege engines are meant to be raided. Every block of the pattern is a key block: when one is broken by a player, burnt, blown up, moved by a piston, or changed by a player or mob, the trebuchet is destroyed and removed from `trebuchets.yml`. Stripping the axle with an axe is one such change, because a stripped log no longer matches the pattern. A player who breaks or changes the block is told:
 
 ```
 Trebuchet destroyed.
 ```
+
+The trebuchet is also checked whenever its load block is right-clicked. If a part has gone missing in any other way, that click destroys the engine instead of loading, firing or aiming it, and you are told the same thing.
 
 The rest of the structure stays where it is. Putting the missing block back builds a new, unloaded trebuchet, exactly as if it had been placed for the first time. Breaking a block that is not part of the pattern, such as decoration in a `.` position, does nothing to the engine.

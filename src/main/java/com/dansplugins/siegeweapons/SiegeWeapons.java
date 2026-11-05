@@ -37,10 +37,11 @@ public final class SiegeWeapons extends JavaPlugin {
         trebuchets.replaceAll(storage.load());
         getServer().getPluginManager().registerEvents(
                 new TrebuchetBuildListener(new TrebuchetBuilder(trebuchets, storage, getLogger()::warning)), this);
+        TrebuchetDestroyer destroyer = new TrebuchetDestroyer(trebuchets, storage, getLogger()::warning);
+        getServer().getPluginManager().registerEvents(new TrebuchetDestroyListener(destroyer), this);
         getServer().getPluginManager().registerEvents(
-                new TrebuchetDestroyListener(new TrebuchetDestroyer(trebuchets, storage, getLogger()::warning)), this);
-        getServer().getPluginManager().registerEvents(
-                new TrebuchetFireListener(new TrebuchetFiring(trebuchets, settings.shotCooldown(), System::nanoTime),
+                new TrebuchetFireListener(destroyer,
+                        new TrebuchetFiring(trebuchets, settings.shotCooldown(), System::nanoTime),
                         new TrebuchetAiming(trebuchets, settings.minRange(), settings.maxRange(), settings.rangeStep()),
                         // Closed until Medieval Factions is integrated, so shots break no blocks.
                         settings, WarGate.closed()), this);
