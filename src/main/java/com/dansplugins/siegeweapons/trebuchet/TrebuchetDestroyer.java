@@ -3,6 +3,7 @@ package com.dansplugins.siegeweapons.trebuchet;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -39,12 +40,34 @@ public final class TrebuchetDestroyer {
             }
         }
         if (!destroyed.isEmpty()) {
-            try {
-                storage.save(registry.all());
-            } catch (IOException e) {
-                warn.accept("Could not save trebuchets: " + e.getMessage());
-            }
+            save();
         }
         return destroyed;
+    }
+
+    /**
+     * Checks the trebuchet whose load block is at ({@code x}, {@code y}, {@code z}) against the
+     * world, and destroys it if any part is missing. This catches a part lost in a way no event
+     * reported, so an engine that has lost one can never be loaded, aimed or fired.
+     *
+     * @return the trebuchet destroyed; empty if this is not a load block or the engine is whole
+     */
+    public Optional<Trebuchet> loadBlockUsed(String world, TrebuchetPattern.BlockLookup blocks, int x, int y, int z) {
+        Optional<Trebuchet> destroyed = registry.findByAnchor(world, x, y - TrebuchetFiring.LOAD_BLOCK_UP, z)
+                .filter(trebuchet -> !TrebuchetPattern.isCompleteAt(
+                        blocks, trebuchet.x(), trebuchet.y(), trebuchet.z(), trebuchet.facing()))
+                .filter(registry::unregister);
+        if (destroyed.isPresent()) {
+            save();
+        }
+        return destroyed;
+    }
+
+    private void save() {
+        try {
+            storage.save(registry.all());
+        } catch (IOException e) {
+            warn.accept("Could not save trebuchets: " + e.getMessage());
+        }
     }
 }

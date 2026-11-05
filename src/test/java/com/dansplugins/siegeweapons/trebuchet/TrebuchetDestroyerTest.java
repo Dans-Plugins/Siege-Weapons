@@ -1,11 +1,13 @@
 package com.dansplugins.siegeweapons.trebuchet;
 
+import org.bukkit.Material;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -91,5 +93,71 @@ class TrebuchetDestroyerTest {
         assertEquals(List.of(first, second), remove("world", 1, 64, 0));
 
         assertTrue(registry.all().isEmpty());
+    }
+
+    private Optional<Trebuchet> useLoadBlock(FakeWorld blocks, String world, int x, int y, int z) {
+        return new TrebuchetDestroyer(registry, storage(), warnings::add).loadBlockUsed(world, blocks, x, y, z);
+    }
+
+    @Test
+    void usingTheLoadBlockOfAWholeEngineLeavesItStanding() throws Exception {
+        FakeWorld blocks = new FakeWorld();
+        blocks.buildTrebuchet(0, 64, 0, Facing.EAST);
+        Trebuchet trebuchet = built("world", 0, 64, 0, Facing.EAST);
+
+        assertEquals(Optional.empty(), useLoadBlock(blocks, "world", 0, 66, 0));
+
+        assertEquals(List.of(trebuchet), List.copyOf(registry.all()));
+    }
+
+    @Test
+    void usingTheLoadBlockDestroysAnEngineMissingAnyPartAndSavesTheRegistry() throws Exception {
+        for (TrebuchetPattern.Part part : TrebuchetPattern.PARTS) {
+            FakeWorld blocks = new FakeWorld();
+            blocks.buildTrebuchet(10, 64, -20, Facing.WEST);
+            blocks.set(FakeWorld.worldX(10, part, Facing.WEST), 64 + part.up(),
+                    FakeWorld.worldZ(-20, part, Facing.WEST), Material.AIR);
+            Trebuchet trebuchet = built("world", 10, 64, -20, Facing.WEST);
+
+            assertEquals(Optional.of(trebuchet), useLoadBlock(blocks, "world", 10, 66, -20), "lost " + part);
+
+            assertTrue(registry.all().isEmpty(), "lost " + part);
+            assertTrue(storage().load().isEmpty(), "lost " + part);
+        }
+        assertTrue(warnings.isEmpty(), warnings::toString);
+    }
+
+    @Test
+    void aStrippedAxleCountsAsAMissingPart() throws Exception {
+        FakeWorld blocks = new FakeWorld();
+        blocks.buildTrebuchet(0, 64, 0, Facing.NORTH);
+        blocks.set(1, 66, 0, Material.STRIPPED_OAK_LOG);
+        Trebuchet trebuchet = built("world", 0, 64, 0, Facing.NORTH);
+
+        assertEquals(Optional.of(trebuchet), useLoadBlock(blocks, "world", 0, 66, 0));
+    }
+
+    @Test
+    void usingABlockThatIsNotALoadBlockChecksNothing() throws Exception {
+        // The world holds none of the engine, so anything that did check it would destroy it.
+        Trebuchet trebuchet = built("world", 0, 64, 0, Facing.NORTH);
+
+        assertEquals(Optional.empty(), useLoadBlock(new FakeWorld(), "world", 1, 66, 0));
+        assertEquals(Optional.empty(), useLoadBlock(new FakeWorld(), "world_nether", 0, 66, 0));
+
+        assertEquals(List.of(trebuchet), List.copyOf(registry.all()));
+    }
+
+    @Test
+    void onlyTheEngineWhoseLoadBlockWasUsedIsChecked() throws Exception {
+        FakeWorld blocks = new FakeWorld();
+        blocks.buildTrebuchet(0, 64, 0, Facing.NORTH);
+        Trebuchet whole = built("world", 0, 64, 0, Facing.NORTH);
+        Trebuchet broken = built("world", 20, 64, 0, Facing.SOUTH);
+
+        assertEquals(Optional.empty(), useLoadBlock(blocks, "world", 0, 66, 0));
+        assertEquals(Optional.of(broken), useLoadBlock(blocks, "world", 20, 66, 0));
+
+        assertEquals(List.of(whole), storage().load());
     }
 }
