@@ -8,8 +8,11 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Snowball;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockExplodeEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -24,7 +27,8 @@ import java.util.UUID;
  * Bukkit glue: has the {@link TrebuchetDestroyer} check an engine for missing parts when its load
  * block is used, then hands sneaking right-clicks on a block to {@link TrebuchetAiming} and other
  * right-clicks to {@link TrebuchetFiring}, launches the projectile a fired engine throws, and
- * explodes it where it lands, breaking blocks only if the {@link WarGate} allows it.
+ * explodes it where it lands through {@link ShotBlast}, which holds the explosion to the blocks
+ * the {@link WarGate} allows.
  */
 public final class TrebuchetFireListener implements Listener {
 
@@ -35,16 +39,16 @@ public final class TrebuchetFireListener implements Listener {
     private final TrebuchetFiring firing;
     private final TrebuchetAiming aiming;
     private final TrebuchetSettings settings;
-    private final WarGate warGate;
+    private final ShotBlast blast;
     private final Set<UUID> inFlight = new HashSet<>();
 
     public TrebuchetFireListener(TrebuchetDestroyer destroyer, TrebuchetFiring firing, TrebuchetAiming aiming,
-                                 TrebuchetSettings settings, WarGate warGate) {
+                                 TrebuchetSettings settings, ShotBlast blast) {
         this.destroyer = destroyer;
         this.firing = firing;
         this.aiming = aiming;
         this.settings = settings;
-        this.warGate = warGate;
+        this.blast = blast;
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -100,10 +104,20 @@ public final class TrebuchetFireListener implements Listener {
         Entity source = event.getEntity().getShooter() instanceof Entity shooter ? shooter : null;
         UUID firer = source instanceof Player player ? player.getUniqueId() : null;
         Location landed = projectile.getLocation();
-        boolean breaksBlocks = warGate.mayBreakBlockAt(firer, projectile.getWorld().getName(),
-                landed.getBlockX(), landed.getBlockZ());
-        projectile.getWorld().createExplosion(landed, settings.explosionPower(), false, breaksBlocks, source);
+        World world = projectile.getWorld();
+        blast.detonate(firer, world.getName(), landed.getBlockX(), landed.getBlockZ(), breaksBlocks ->
+                world.createExplosion(landed, settings.explosionPower(), false, breaksBlocks, source));
         projectile.remove();
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onEntityExplode(EntityExplodeEvent event) {
+        blast.keepAllowed(event.blockList(), Block::getX, Block::getZ);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onBlockExplode(BlockExplodeEvent event) {
+        blast.keepAllowed(event.blockList(), Block::getX, Block::getZ);
     }
 
     private void launch(World world, Trebuchet trebuchet, int range, Player firer) {

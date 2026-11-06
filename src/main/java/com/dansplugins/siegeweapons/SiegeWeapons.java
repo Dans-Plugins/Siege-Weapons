@@ -1,5 +1,6 @@
 package com.dansplugins.siegeweapons;
 
+import com.dansplugins.siegeweapons.trebuchet.ShotBlast;
 import com.dansplugins.siegeweapons.trebuchet.TrebuchetAiming;
 import com.dansplugins.siegeweapons.trebuchet.TrebuchetBuildListener;
 import com.dansplugins.siegeweapons.trebuchet.TrebuchetBuilder;
@@ -44,7 +45,7 @@ public final class SiegeWeapons extends JavaPlugin {
                         new TrebuchetFiring(trebuchets, settings.shotCooldown(), System::nanoTime),
                         new TrebuchetAiming(trebuchets, settings.minRange(), settings.maxRange(), settings.rangeStep()),
                         // Closed until Medieval Factions is integrated, so shots break no blocks.
-                        settings, WarGate.closed()), this);
+                        settings, new ShotBlast(WarGate.closed())), this);
     }
 
     @Override
