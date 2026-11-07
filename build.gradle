@@ -15,10 +15,17 @@ repositories {
         name = "sonatype"
         url = "https://oss.sonatype.org/content/groups/public/"
     }
+    maven {
+        name = "dansplugins"
+        url = "https://repo.dansplugins.com/repository/maven-public/"
+    }
 }
 
 dependencies {
     compileOnly("org.spigotmc:spigot-api:1.21.4-R0.1-SNAPSHOT")
+    // Provided by the installed plugin, never bundled: a bundled copy would shadow the running one.
+    // 5.7.2 is the newest version on the Dan's Plugins repository, and the one Democracy builds against.
+    compileOnly("com.dansplugins:medieval-factions:5.7.2:all")
 
     // Test dependencies
     // The Spigot API is compileOnly above, so it is repeated here to put it on the test classpath.

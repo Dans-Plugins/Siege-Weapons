@@ -2,14 +2,18 @@ package com.dansplugins.siegeweapons.trebuchet;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class WarGateTest {
@@ -46,7 +50,8 @@ class WarGateTest {
 
     private final UUID firer = UUID.randomUUID();
     private final FakeFactions factions = new FakeFactions();
-    private final WarGate gate = new WarGate(factions);
+    private final List<String> warnings = new ArrayList<>();
+    private final WarGate gate = new WarGate(factions, warnings::add);
 
     /** The firer is in a faction at war with the owner of chunk (0, 0), the case every other test varies. */
     private void firerIsAtWarWithTheOwnerOfTheChunk() {
@@ -128,5 +133,72 @@ class WarGateTest {
 
         assertFalse(closed.mayBreakBlockAt(firer, WORLD, 5, 5));
         assertFalse(closed.mayBreakBlockAt(null, WORLD, 5, 5));
+    }
+
+    /** The lookup fails only once the gate asks about the war, so every earlier answer was a yes. */
+    private WarGate gateWhoseWarLookupThrows(Error error) {
+        return new WarGate(new WarGate.Factions() {
+            @Override
+            public Optional<String> factionOf(UUID player) {
+                return Optional.of(ATTACKERS);
+            }
+
+            @Override
+            public Optional<String> claimOwner(String world, int chunkX, int chunkZ) {
+                return Optional.of(ENEMIES);
+            }
+
+            @Override
+            public boolean atWar(String faction, String otherFaction) {
+                throw error;
+            }
+        }, warnings::add);
+    }
+
+    @Test
+    void aLookupThatIsNoLongerCompatibleBreaksNothing() {
+        WarGate broken = gateWhoseWarLookupThrows(new NoSuchMethodError("getFactionsAtWarWithByFactionId"));
+
+        assertFalse(broken.mayBreakBlockAt(firer, WORLD, 5, 5));
+    }
+
+    @Test
+    void aLookupThatFailsBreaksNothing() {
+        WarGate broken = new WarGate(new WarGate.Factions() {
+            @Override
+            public Optional<String> factionOf(UUID player) {
+                throw new IllegalStateException("services not ready");
+            }
+
+            @Override
+            public Optional<String> claimOwner(String world, int chunkX, int chunkZ) {
+                return Optional.of(ENEMIES);
+            }
+
+            @Override
+            public boolean atWar(String faction, String otherFaction) {
+                return true;
+            }
+        }, warnings::add);
+
+        assertFalse(broken.mayBreakBlockAt(firer, WORLD, 5, 5));
+    }
+
+    @Test
+    void aFailingLookupIsReportedOnceNotOncePerBlock() {
+        WarGate broken = gateWhoseWarLookupThrows(new NoSuchMethodError("getFactionsAtWarWithByFactionId"));
+
+        broken.mayBreakBlockAt(firer, WORLD, 5, 5);
+        broken.mayBreakBlockAt(firer, WORLD, 6, 5);
+
+        assertEquals(1, warnings.size(), warnings.toString());
+        assertTrue(warnings.get(0).contains("getFactionsAtWarWithByFactionId"), warnings.get(0));
+    }
+
+    @Test
+    void anErrorThatIsNotAboutTheLookupIsNotSwallowed() {
+        WarGate broken = gateWhoseWarLookupThrows(new OutOfMemoryError("not the gate's to hide"));
+
+        assertThrows(OutOfMemoryError.class, () -> broken.mayBreakBlockAt(firer, WORLD, 5, 5));
     }
 }

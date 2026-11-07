@@ -37,6 +37,7 @@ class ShotBlastTest {
     private final UUID firer = UUID.randomUUID();
     private final Map<UUID, String> members = new HashMap<>(Map.of(firer, ATTACKERS));
     private final Map<Integer, String> claimsByChunkX = new HashMap<>(Map.of(0, ENEMIES, 1, NEUTRALS));
+    private boolean warLookupFailsForNeutrals;
 
     private final ShotBlast blast = new ShotBlast(new WarGate(new WarGate.Factions() {
         @Override
@@ -51,9 +52,12 @@ class ShotBlastTest {
 
         @Override
         public boolean atWar(String faction, String otherFaction) {
+            if (warLookupFailsForNeutrals && NEUTRALS.equals(otherFaction)) {
+                throw new IllegalStateException("war lookup failed");
+            }
             return ATTACKERS.equals(faction) && ENEMIES.equals(otherFaction);
         }
-    }));
+    }, message -> { }));
 
     private List<BlockAt> blocksLeftAfterAShot(UUID shooter, String world, BlockAt landed, BlockAt... reached) {
         List<BlockAt> blocks = new ArrayList<>(List.of(reached));
@@ -84,6 +88,15 @@ class ShotBlastTest {
     void aBlastInEnemyLandKeepsOnlyTheBlocksInEnemyLand() {
         assertEquals(List.of(IN_ENEMY_LAND), blocksLeftAfterAShot(firer, WORLD, IN_ENEMY_LAND,
                 IN_NEUTRAL_LAND, IN_ENEMY_LAND, IN_UNCLAIMED_LAND));
+    }
+
+    /** If this threw, the event handler would stop and the rest of the list would be broken unjudged. */
+    @Test
+    void aLookupFailingPartWayThroughABlastLeavesTheBlockItWasAskedAboutIntact() {
+        warLookupFailsForNeutrals = true;
+
+        assertEquals(List.of(IN_ENEMY_LAND), blocksLeftAfterAShot(firer, WORLD, IN_ENEMY_LAND,
+                IN_NEUTRAL_LAND, IN_ENEMY_LAND));
     }
 
     @Test
