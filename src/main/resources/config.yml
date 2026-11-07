@@ -2,8 +2,8 @@
 
 trebuchet:
   # Power of the explosion where a trebuchet shot lands. TNT is 4.
-  # Shots hurt players and mobs but never break blocks: block damage is reserved for Medieval
-  # Factions wars and is not configurable.
+  # Shots always hurt players and mobs. They break blocks only in land claimed by a Medieval
+  # Factions faction at war with the firer's, and that rule is not configurable.
   explosion-power: 3.0
 
   # Seconds a trebuchet must wait after firing before it can fire again. 0 turns the cooldown off.

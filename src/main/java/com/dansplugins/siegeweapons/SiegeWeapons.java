@@ -1,5 +1,6 @@
 package com.dansplugins.siegeweapons;
 
+import com.dansplugins.siegeweapons.trebuchet.MedievalFactionsWarState;
 import com.dansplugins.siegeweapons.trebuchet.ShotBlast;
 import com.dansplugins.siegeweapons.trebuchet.TrebuchetAiming;
 import com.dansplugins.siegeweapons.trebuchet.TrebuchetBuildListener;
@@ -16,11 +17,13 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Optional;
 
 /**
  * Entry point for SiegeWeapons. Features are scoped in MVP.md; so far a trebuchet can be built,
  * is remembered across restarts, can be aimed, loaded and fired with a cooldown between shots,
- * and is destroyed when one of its blocks is lost. Its shots never break blocks.
+ * and is destroyed when one of its blocks is lost. Its shots break blocks only in land claimed by
+ * a faction at war with the firer's, so the plugin refuses to run without Medieval Factions.
  */
 public final class SiegeWeapons extends JavaPlugin {
 
@@ -29,6 +32,14 @@ public final class SiegeWeapons extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        Optional<WarGate.Factions> factions = MedievalFactionsWarState.of(
+                getServer().getPluginManager().getPlugin(MedievalFactionsWarState.PLUGIN_NAME));
+        if (factions.isEmpty()) {
+            // Never fall back to unrestricted damage (MVP.md): no war state, no plugin.
+            getLogger().severe("A compatible Medieval Factions is not enabled, so Siege Weapons is disabling itself.");
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
         if (!getDataFolder().exists() && !getDataFolder().mkdirs()) {
             getLogger().warning("Could not create the plugin data folder; built trebuchets will not be saved.");
         }
@@ -44,8 +55,7 @@ public final class SiegeWeapons extends JavaPlugin {
                 new TrebuchetFireListener(destroyer,
                         new TrebuchetFiring(trebuchets, settings.shotCooldown(), System::nanoTime),
                         new TrebuchetAiming(trebuchets, settings.minRange(), settings.maxRange(), settings.rangeStep()),
-                        // Closed until Medieval Factions is integrated, so shots break no blocks.
-                        settings, new ShotBlast(WarGate.closed())), this);
+                        settings, new ShotBlast(new WarGate(factions.get(), getLogger()::warning))), this);
     }
 
     @Override
