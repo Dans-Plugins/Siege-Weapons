@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Proxy;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -37,5 +39,17 @@ class MedievalFactionsWarStateTest {
     @Test
     void aPluginWhoseClassesDoNotMatchGivesNoWarState() {
         assertTrue(MedievalFactionsWarState.of(pluginThatIsEnabled(true)).isEmpty());
+    }
+
+    /** Every lookup runs this first, so a disabled Medieval Factions makes the WarGate say no. */
+    @Test
+    void aLookupAfterThePluginIsDisabledFails() {
+        assertThrows(IllegalStateException.class,
+                () -> MedievalFactionsWarState.requireEnabled(pluginThatIsEnabled(false)));
+    }
+
+    @Test
+    void aLookupWhileThePluginIsEnabledGoesAhead() {
+        assertDoesNotThrow(() -> MedievalFactionsWarState.requireEnabled(pluginThatIsEnabled(true)));
     }
 }

@@ -18,4 +18,4 @@ If `trebuchet.min-range` is greater than `trebuchet.max-range`, both use their d
 
 ## Block damage
 
-There is no key for block damage, and there never will be. A trebuchet shot hurts players and mobs wherever it lands, but it breaks blocks only when it lands in a chunk claimed by a Medieval Factions faction at war with the firer's faction. A blast that reaches into a neighbouring chunk has to pass the same check there, block by block. If Medieval Factions cannot answer, the shot breaks nothing and a warning is written to the server log. See [MVP.md](MVP.md).
+There is no key for block damage, and there never will be. A trebuchet shot hurts players and mobs wherever it lands, but it breaks blocks only when it lands in a chunk claimed by a Medieval Factions faction at war with the firer's faction. A blast that reaches into a neighbouring chunk has to pass the same check there, block by block. A shot never sets off TNT. If Medieval Factions cannot answer, or has been disabled, the shot breaks nothing and a warning is written to the server log. See [MVP.md](MVP.md).

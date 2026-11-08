@@ -67,7 +67,7 @@ After a shot, a trebuchet has to wait before it can fire again: 10 seconds by de
 
 The shot is thrown from just above the axle, in the direction the trebuchet faces, at 45 degrees. It flies in an arc and, on level ground, lands about the trebuchet's range away from the centre of its base (see [Aiming](#aiming)). Hills, walls and slopes in the way change where it actually comes down.
 
-Where the shot lands it explodes, with the power set by `trebuchet.explosion-power` (see [CONFIG.md](CONFIG.md)). The explosion always hurts players and mobs. It **breaks blocks only during a Medieval Factions war, in land claimed by the enemy**: the chunk must be claimed by a faction at war with your faction at the moment the shot lands. Each block is judged by its own chunk, so a blast in enemy land leaves the blocks of a neighbouring chunk alone unless that chunk is enemy land too. Everywhere else, and for a player in no faction, the explosion leaves terrain as it was.
+Where the shot lands it explodes, with the power set by `trebuchet.explosion-power` (see [CONFIG.md](CONFIG.md)). The explosion always hurts players and mobs. It **breaks blocks only during a Medieval Factions war, in land claimed by the enemy**: the chunk must be claimed by a faction at war with your faction at the moment the shot lands. Each block is judged by its own chunk, so a blast in enemy land leaves the blocks of a neighbouring chunk alone unless that chunk is enemy land too. Everywhere else, and for a player in no faction, the explosion leaves terrain as it was. A shot never sets off TNT, even in enemy land: the TNT block is left where it is.
 
 Requires [Medieval Factions](https://github.com/Dans-Plugins/Medieval-Factions): Siege Weapons will not enable without it.
 
