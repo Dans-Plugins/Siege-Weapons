@@ -112,12 +112,17 @@ public final class TrebuchetFireListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onEntityExplode(EntityExplodeEvent event) {
-        blast.keepAllowed(event.blockList(), Block::getX, Block::getZ);
+        blast.keepAllowed(event.blockList(), Block::getX, Block::getZ, TrebuchetFireListener::setsOffExplosion);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onBlockExplode(BlockExplodeEvent event) {
-        blast.keepAllowed(event.blockList(), Block::getX, Block::getZ);
+        blast.keepAllowed(event.blockList(), Block::getX, Block::getZ, TrebuchetFireListener::setsOffExplosion);
+    }
+
+    /** TNT is the one block an explosion sets off rather than breaks. */
+    static boolean setsOffExplosion(Block block) {
+        return block.getType() == Material.TNT;
     }
 
     private void launch(World world, Trebuchet trebuchet, int range, Player firer) {

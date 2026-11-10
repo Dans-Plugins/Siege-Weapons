@@ -1,5 +1,6 @@
 package com.dansplugins.siegeweapons;
 
+import com.dansplugins.siegeweapons.trebuchet.MedievalFactionsWarState;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.junit.jupiter.api.Test;
 
@@ -24,6 +25,16 @@ class SiegeWeaponsTest {
             String yml = new String(in.readAllBytes(), StandardCharsets.UTF_8);
             assertTrue(yml.contains("main: " + SiegeWeapons.class.getName()), yml);
             assertTrue(!yml.contains("${version}"), "version placeholder must be expanded");
+        }
+    }
+
+    @Test
+    void pluginYmlDependsOnMedievalFactions() throws IOException {
+        try (InputStream in = getClass().getClassLoader().getResourceAsStream("plugin.yml")) {
+            assertNotNull(in, "plugin.yml must be on the classpath");
+            String yml = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+            // From the start of the line: softdepend would let the plugin load without it.
+            assertTrue(yml.contains("\ndepend: [" + MedievalFactionsWarState.PLUGIN_NAME + "]"), yml);
         }
     }
 }
