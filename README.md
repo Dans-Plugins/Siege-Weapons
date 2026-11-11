@@ -2,7 +2,7 @@
 
 ## Description
 
-Siege Weapons is a Minecraft plugin that adds buildable medieval siege engines — trebuchets, catapults and battering rams — to a server where players hold territory worth besieging.
+Siege Weapons is a Minecraft plugin that adds buildable medieval siege engines to a server where players hold territory worth besieging. The first release has one engine, the trebuchet. Catapults, ballistae, rams and towers are deliberately left out of it (see [MVP.md](MVP.md)).
 
 It is designed as a companion to [Medieval Factions](https://github.com/Dans-Plugins/Medieval-Factions). Factions can already declare war, claim land and fight over it, but a wall is still only as strong as the pickaxe in front of it. Siege engines make breaching a stronghold a deliberate, visible, expensive act that the defenders can see coming.
 
@@ -12,12 +12,13 @@ This plugin was proposed from a Kingdom: First Era player request on 2026-09-04.
 
 **In development, not yet released.** A trebuchet can be built, is remembered across restarts, can be aimed, loaded and fired with a cooldown between shots, and can be destroyed by breaking one of its blocks. Its shots break blocks only in land claimed by a faction at war with the firer's. The scope of the first release is defined in [MVP.md](MVP.md) — it starts with a single engine, on purpose.
 
-## Planned Features
+## Features
 
-- Multiblock siege engines built from an in-world pattern, not a crafting recipe
-- Aim and fire, with a real projectile arc
-- Block damage gated on Medieval Factions war state and claim ownership
-- Configurable ammunition, range and cooldown
+- A trebuchet built from vanilla blocks placed in an in-world pattern, not a crafting recipe
+- Aim its range, load it with cobblestone and fire it, with a real projectile arc
+- Destroyed by breaking any one of its blocks, so it can be raided
+- Block damage gated on Medieval Factions war state and claim ownership, which no setting can turn off
+- Configurable explosion power, range and cooldown (see [CONFIG.md](CONFIG.md))
 
 ## Installation
 
