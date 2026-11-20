@@ -11,7 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TrebuchetStorageTest {
@@ -102,11 +105,74 @@ class TrebuchetStorageTest {
     }
 
     @Test
-    void aFileWithoutATrebuchetsSectionLoadsNothing() throws IOException {
-        Files.writeString(dir.resolve("trebuchets.yml"), "something-else: 1\n");
+    void aFileWithoutATrebuchetsSectionLoadsNothingAndIsNeverSavedOver() throws IOException {
+        Path file = dir.resolve("trebuchets.yml");
+        Files.writeString(file, "something-else: 1\n");
+        TrebuchetStorage storage = storage();
 
-        assertTrue(storage().load().isEmpty());
+        assertTrue(storage.load().isEmpty());
+        assertTrue(storage.isLoadFailed());
+        assertEquals(1, warnings.size(), warnings::toString);
+        assertThrows(IOException.class, () -> storage.save(List.of()));
+        assertEquals("something-else: 1\n", Files.readString(file));
+    }
+
+    @Test
+    void anEmptyFileLoadsNothingAndCanBeSaved() throws IOException {
+        Files.writeString(dir.resolve("trebuchets.yml"), "");
+        TrebuchetStorage storage = storage();
+
+        assertTrue(storage.load().isEmpty());
+        assertFalse(storage.isLoadFailed());
+        storage.save(List.of());
         assertTrue(warnings.isEmpty(), warnings::toString);
+    }
+
+    @Test
+    void aFileThatCannotBeParsedLoadsNothingAndIsNeverSavedOver() throws IOException {
+        // prepare - a good save, then the file cut off part way through an entry
+        TrebuchetStorage storage = storage();
+        storage.save(List.of(
+                new Trebuchet(UUID.randomUUID(), "world", 10, 64, -20, Facing.EAST),
+                new Trebuchet(UUID.randomUUID(), "world_nether", -3, 40, 7, Facing.WEST)));
+        Path file = dir.resolve("trebuchets.yml");
+        String full = Files.readString(file);
+        Files.writeString(file, full.substring(0, full.indexOf("facing")) + "facing: [EAST\n  :");
+        byte[] broken = Files.readAllBytes(file);
+        TrebuchetStorage restarted = storage();
+
+        // execute - load on the next start, then a build/destroy save or the save on shutdown
+        List<Trebuchet> loaded = restarted.load();
+        IOException refused = assertThrows(IOException.class, () -> restarted.save(List.of()));
+
+        // verify
+        assertTrue(loaded.isEmpty());
+        assertTrue(restarted.isLoadFailed());
+        assertTrue(refused.getMessage().contains("not saved over"), refused::getMessage);
+        assertArrayEquals(broken, Files.readAllBytes(file));
+    }
+
+    @Test
+    void aSuccessfulLoadClearsAnEarlierFailure() throws IOException {
+        Path file = dir.resolve("trebuchets.yml");
+        Files.writeString(file, "trebuchets: [\n");
+        TrebuchetStorage storage = storage();
+        storage.load();
+        Files.delete(file);
+
+        storage.load();
+
+        assertFalse(storage.isLoadFailed());
+        storage.save(List.of());
+    }
+
+    @Test
+    void savingLeavesNoTemporaryFileBehind() throws IOException {
+        storage().save(List.of(new Trebuchet(UUID.randomUUID(), "world", 1, 2, 3, Facing.SOUTH)));
+
+        try (var files = Files.list(dir)) {
+            assertTrue(files.noneMatch(f -> f.getFileName().toString().endsWith(".tmp")));
+        }
     }
 
     @Test

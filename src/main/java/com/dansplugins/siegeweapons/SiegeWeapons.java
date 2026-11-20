@@ -47,6 +47,13 @@ public final class SiegeWeapons extends JavaPlugin {
         TrebuchetSettings settings = TrebuchetSettings.from(getConfig(), getLogger()::warning);
         storage = new TrebuchetStorage(new File(getDataFolder(), "trebuchets.yml"), getLogger()::warning);
         trebuchets.replaceAll(storage.load());
+        if (storage.isLoadFailed()) {
+            // Running on would let players build trebuchets that could never be saved (save()
+            // refuses, so the unreadable file is not overwritten).
+            getLogger().severe("Siege Weapons is disabling itself because trebuchets.yml could not be read.");
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
         getServer().getPluginManager().registerEvents(
                 new TrebuchetBuildListener(new TrebuchetBuilder(trebuchets, storage, getLogger()::warning)), this);
         TrebuchetDestroyer destroyer = new TrebuchetDestroyer(trebuchets, storage, getLogger()::warning);
