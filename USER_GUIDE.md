@@ -52,7 +52,7 @@ The order you place the blocks in does not matter. Placing more blocks on an eng
 
 ### Where trebuchets are stored
 
-Built trebuchets are saved to `plugins/SiegeWeapons/trebuchets.yml`. Each one records its world, the position of the centre block of its ground layer, and its facing. An entry the plugin cannot read is skipped, and a warning is written to the server log.
+Built trebuchets are saved to `plugins/SiegeWeapons/trebuchets.yml`. Each one records its world, the position of the centre block of its ground layer, and its facing. An entry the plugin cannot read is skipped, and a warning is written to the server log. If the whole file cannot be read (a YAML error, or content with no `trebuchets` section), no trebuchets are loaded, the file is left exactly as it was and is never saved over, and Siege Weapons disables itself with an error in the server log. Repair or restore the file and restart the server. Each save is written to `trebuchets.yml.tmp` and moved into place, so a crash during a save keeps the previous file.
 
 ## Loading and firing
 
